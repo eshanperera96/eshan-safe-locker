@@ -1,14 +1,6 @@
 {
   "hosting": [
     {
-      "public": "dist/eshan-safe-locker",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ]
-    },
-    {
       "target": "eshan-safe-locker",
       "public": "dist/eshan-safe-locker",
       "ignore": [
