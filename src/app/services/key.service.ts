@@ -1,19 +1,30 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {SecreteKey} from '../model/secrete-key';
+import {RandomService} from './random.service';
+import {CryptoService} from './crypto.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class KeyService {
 
-  constructor() { }
+  constructor(private randomService: RandomService, private cryptoService: CryptoService) { }
 
-  public generateKey(): SecreteKey {
-    const secreteKey: SecreteKey = {
-      key: '123456',
-      encryptedKey: 'g6o8v3jrEYhuZ/NNWAO4AQ==',
+  public generateKey(uniqueKey: string): SecreteKey {
+    const key = this.randomService.generateRandomString(10);
+    const encryptKey = this.cryptoService.encryptString(key, uniqueKey);
+
+    return {
+      key,
+      encryptedKey: encryptKey.encryptedKey,
+      decryptedKey: encryptKey.decryptedKey,
+      uniqueKey
     };
-    secreteKey.decryptedKey = 'test-secrete-key';
-    return secreteKey;
+  }
+
+  public verifySecreteKey(systemSecreteKey: SecreteKey, userSecreteKey: SecreteKey): boolean {
+    return !(systemSecreteKey.decryptedKey !== userSecreteKey.decryptedKey
+      || systemSecreteKey.encryptedKey !== userSecreteKey.encryptedKey
+      || systemSecreteKey.uniqueKey !== userSecreteKey.uniqueKey);
   }
 }

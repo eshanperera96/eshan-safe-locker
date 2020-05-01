@@ -14,7 +14,7 @@ const firebaseConfig = {
   storageBucket: 'eshan-safe-locker.appspot.com',
   messagingSenderId: '624508811763',
   appId: '1:624508811763:web:c8f06a21171737bd2afa86',
-  measurementId: 'G-E56TW39FY1'
+  measurementId: 'G-E56TW39FY1' //set the firebase info to deploy the javascript file to app service
 };
 
 @NgModule({

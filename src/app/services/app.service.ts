@@ -1,64 +1,83 @@
-import {Injectable, OnInit} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {Locker} from '../model/locker';
-import {User} from '../model/user';
-import {Message} from '../model/message';
+import {User, UserType} from '../model/user';
+import {MessageType} from '../model/message';
+import {KeyService} from './key.service';
+import {Subscription} from 'rxjs';
+import {SecreteKey} from '../model/secrete-key';
+import {FirebaseService} from './firebase.service';
+import {ResponseService} from './response.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AppService {
+export class AppService implements OnDestroy {
 
-  constructor(private db: AngularFireDatabase) {
+  private verifyOpenSubscription: Subscription;
+  private decryptedCodeSubscription: Subscription;
+
+  constructor(private db: AngularFireDatabase,
+              private keyService: KeyService,
+              private firebaseService: FirebaseService,
+              private responseService: ResponseService) {
   }
 
-  public handleLockersState(lockers: Array<Locker>): void {
-    const locker: Locker = lockers[0];
-
+  public handleLockersState(locker: Locker): void {
     // identify taring to open
-    if (locker.tryingToOpen) {
+    if (locker._tryingToOpen) {
       this.handleTryingToOpen(locker);
-      setTimeout(() => {
-        locker.tryingToOpen = false;
-        this.handleAutoResetTryingToOpen(locker);
-      }, 3000);
-    }
 
-    // identify is open
-    if (locker.isOpen) {
-      this.handleIsOpen(locker);
+      // set a timeout for if trying to open method is false (3 sec)
+      locker._tryingToOpen = false;
+      this.firebaseService.resetObject(`lockers/${locker._id}`, locker, 3000);
     }
   }
-
 
   private handleTryingToOpen(locker: Locker): void {
-    const message: Message = {
-      body: `Trying To Open Locker: ${locker._id}`,
-      date: new Date().toISOString()
-    };
-    locker.users.filter(user => user.isInformTryingToOpen)
-      .forEach(value => this.informUser(value, message));
+    const user = locker.users.find(usr => usr.type === 'OWNER');
+    const secreteKey: SecreteKey = this.keyService.generateKey(user.uniqueKey);
+
+    locker._secreteKey = secreteKey;
+    this.firebaseService.updateObject(`lockers/${locker._id}`, locker);
+
+    this.responseService.responseUser(user, secreteKey.encryptedKey, `Trying To Open Locker: ${locker._id}`, MessageType.ALERT);
+
+    //  listen verifyOpen
+    this.verifyOpenSubscription = this.firebaseService.valueChanges(`lockers/${locker._id}/_verifyOpen`)
+      .subscribe(verifyOpen => {
+        if (verifyOpen === true) {
+          this.handleVerifyOpen(locker, user, secreteKey);
+        }
+      });
   }
 
-  private handleIsOpen(locker: Locker) {
-    locker.users.forEach(user => {
-      // console.log(user);
-    });
+  private handleVerifyOpen(locker: Locker, user: User, secreteKey: SecreteKey): void {
+    this.responseService.responseUser(user, secreteKey.decryptedKey, 'Decrypt Key', MessageType.INFO);
+
+    // listen decryptedCode
+    this.decryptedCodeSubscription = this.firebaseService.valueChanges(`lockers/${locker._id}/users/0/decryptedCode`)
+      .subscribe((decryptedCode: SecreteKey) => {
+        if (decryptedCode) {
+          this.handleVerifyDecryptedCode(locker, secreteKey, decryptedCode);
+        }
+      });
   }
 
-  private informUser(user: User, message: Message): void {
-    console.log(message);
-    this.db
-      .object(`users/${user._id}/messages`)
-      .set(message)
-      .then(_ => console.log('success'))
-      .catch(err => console.log(err, 'You dont have access!'));
+  private handleVerifyDecryptedCode(locker: Locker, systemSecreteKey: SecreteKey, userSecreteKey: SecreteKey): void {
+    if (this.keyService.verifySecreteKey(systemSecreteKey, userSecreteKey)) {
+      locker._doOpen = true;
+      this.firebaseService.updateObject(`lockers/${locker._id}`, locker);
+    } else {
+      locker._doLock = true;
+      this.firebaseService.updateObject(`lockers/${locker._id}`, locker);
+    }
   }
 
-  private handleAutoResetTryingToOpen(locker: Locker): void {
-    this.db.object(`lockers/${locker._id}`)
-      .update(locker)
-      .then(_ => console.log('success'))
-      .catch(err => console.log(err, 'You dont have access!'));
+  ngOnDestroy(): void {
+    if (this.verifyOpenSubscription) {
+      this.verifyOpenSubscription.unsubscribe();
+      this.decryptedCodeSubscription.unsubscribe();
+    }
   }
 }
