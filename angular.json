@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "eshan-safe-locker"
+    }
+  },
+  "defaultProject": "eshan-safe-locker",
+  "cli": {
+    "analytics": "30b6b018-77c6-4774-b9f9-1c6eea63aa7d"
+  }
 }
