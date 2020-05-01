@@ -121,6 +121,10 @@
               "devServerTarget": "eshan-safe-locker:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {}
         }
       }
     }

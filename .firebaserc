@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "eshan-safe-locker"
+  },
+  "targets": {
+    "eshan-safe-locker": {
+      "hosting": {
+        "eshan-safe-locker": [
+          "eshan-safe-locker"
+        ]
+      }
+    }
   }
 }
