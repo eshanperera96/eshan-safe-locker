@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {AngularFireDatabase} from '@angular/fire/database';
 import {FirebaseApp} from '@angular/fire';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseService {
+export class FirebaseService implements OnDestroy {
+
+  public subject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(null);
 
   constructor(private fb: FirebaseApp, private db: AngularFireDatabase) { }
 
@@ -27,6 +30,12 @@ export class FirebaseService {
     //   this.resetObject(parentPath, previousValue, resetTimeOut);
     // });
     // this.valueChanges(pathOrRef);
+  }
+
+  public valueOnceChanges(pathOrRef: string): void {
+    this.fb.database().ref(pathOrRef).once('value').then((snapshot: any) => {
+      this.subject.next(snapshot.val());
+    });
   }
 
   public valueChanges(pathOrRef: string, isList?: boolean): any {
@@ -52,13 +61,22 @@ export class FirebaseService {
       .catch(err => console.error(err, errorMsg));
   }
 
-  private getParentPath(path: string): string {
-    if (path.includes('/')) {
-      const nodes = path.split('/');
-      nodes.pop();
-      return nodes.join('/');
-    } else {
-      return path;
+  // private getParentPath(path: string): string {
+  //   if (path.includes('/')) {
+  //     const nodes = path.split('/');
+  //     nodes.pop();
+  //     return nodes.join('/');
+  //   } else {
+  //     return path;
+  //   }
+  // }
+
+  public unsubscribeAll() {
+    if (this.subject) {
+      this.subject.unsubscribe();
     }
+  }
+
+  ngOnDestroy(): void {
   }
 }

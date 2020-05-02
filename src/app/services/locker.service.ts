@@ -9,11 +9,17 @@ export class LockerService {
 
   constructor(private firebaseService: FirebaseService) { }
 
-  public openLocker(locker: Locker) {
-    this.firebaseService.updateObject(`lockers/${locker._id}`, {_doLock: false, _doOpen: true, _tryingToOpen: false, _verifyOpen: false});
+  public tryingToOpen(lockerId: string): void {
+    this.firebaseService.updateObject(`lockers/${lockerId}`, {_tryingToOpen: true});
   }
 
-  public lockLocker(locker: Locker) {
-    this.firebaseService.updateObject(`lockers/${locker._id}`, {_doLock: true, _doOpen: false, _tryingToOpen: false, _verifyOpen: false});
+  public openLocker(lockerId: string): void {
+    console.log('openLocker');
+    this.firebaseService.updateObject(`lockers/${lockerId}`, {_doLock: false, _doOpen: true, _tryingToOpen: false});
+  }
+
+  public lockLocker(lockerId: string) {
+    console.log('lockLocker');
+    this.firebaseService.updateObject(`lockers/${lockerId}`, {_doLock: true, _doOpen: false, _tryingToOpen: false, _verifyOpen: false});
   }
 }

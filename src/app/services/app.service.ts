@@ -17,6 +17,8 @@ export class AppService implements OnDestroy {
 
   private verifyOpenSubscription: Subscription;
   private decryptedCodeSubscription: Subscription;
+  private firebaseSubjectSubscription: Subscription;
+
 
   constructor(private db: AngularFireDatabase,
               private keyService: KeyService,
@@ -55,13 +57,13 @@ export class AppService implements OnDestroy {
   }
 
   private handleVerifyOpen(locker: Locker, user: User, secreteKey: SecreteKey): void {
-    this.firebaseService.resetObject(`lockers/${locker._id}`, {_verifyOpen: false}, 20000);
+    console.log('handleVerifyOpen');
+    // this.firebaseService.resetObject(`lockers/${locker._id}`, {_verifyOpen: false}, 20000);
     // this.responseService.responseUser(user, secreteKey.decryptedKey, 'Decrypt Key', MessageType.INFO);
 
     // listen decryptedCode
-    this.decryptedCodeSubscription = this.firebaseService.valueChanges(`lockers/${locker._id}/users/0/decryptedCode`)
+    this.decryptedCodeSubscription = this.firebaseService.valueChanges(`lockers/${locker._id}/users/0/finalKey`)
       .subscribe((decryptedCode: any) => {
-        console.log(decryptedCode);
         if (decryptedCode) {
           const userSecreteKey: SecreteKey = {
             key: null,
@@ -73,23 +75,33 @@ export class AppService implements OnDestroy {
   }
 
   private handleVerifyDecryptedCode(locker: Locker, systemSecreteKey: SecreteKey, userSecreteKey: SecreteKey): void {
+    console.log('handleVerifyDecryptedCode');
     if (this.keyService.verifySecreteKey(systemSecreteKey, userSecreteKey)) {
       this.firebaseService.valueChanges(`lockers/${locker._id}/_verifyOpen`).subscribe(verifyOpen => {
         if (verifyOpen === true) {
-          this.lockerService.openLocker(locker);
-        } else {
-          this.lockerService.lockLocker(locker);
+          this.lockerService.openLocker(locker._id);
+        } else if (verifyOpen === false) {
+          this.lockerService.lockLocker(locker._id);
         }
       });
     } else {
-      this.lockerService.lockLocker(locker);
+      this.lockerService.lockLocker(locker._id);
+    }
+  }
+
+  unsubscribeAll() {
+    if (this.verifyOpenSubscription) {
+      this.verifyOpenSubscription.unsubscribe();
+    }
+    if (this.decryptedCodeSubscription) {
+      this.decryptedCodeSubscription.unsubscribe();
+    }
+    if (this.firebaseSubjectSubscription) {
+      this.firebaseSubjectSubscription.unsubscribe();
     }
   }
 
   ngOnDestroy(): void {
-    if (this.verifyOpenSubscription) {
-      this.verifyOpenSubscription.unsubscribe();
-      this.decryptedCodeSubscription.unsubscribe();
-    }
+    this.unsubscribeAll();
   }
 }
