@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import {AngularFireDatabase} from '@angular/fire/database';
+import {FirebaseApp} from '@angular/fire';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
 
-  constructor(private db: AngularFireDatabase) { }
+  constructor(private fb: FirebaseApp, private db: AngularFireDatabase) { }
 
   public setObject(pathOrRef: string, data: any, successMsg?: string, errorMsg?: string): void {
     const promise: Promise<void> = this.db.object(pathOrRef).set(data);
@@ -16,6 +17,16 @@ export class FirebaseService {
   public updateObject(pathOrRef: string, data: any, successMsg?: string, errorMsg?: string): void {
     const promise: Promise<void> = this.db.object(pathOrRef).update(data);
     this.handleHandle(promise, successMsg, errorMsg);
+  }
+
+  public valueChangesWithReset(pathOrRef: string, resetTimeOut) {
+    // const parentPath = this.getParentPath(pathOrRef);
+    // let previousValue = null;
+    // this.fb.database().ref(pathOrRef).once('value').then((snapshot: any) => {
+    //   previousValue = {[snapshot.key]: snapshot.val()};
+    //   this.resetObject(parentPath, previousValue, resetTimeOut);
+    // });
+    // this.valueChanges(pathOrRef);
   }
 
   public valueChanges(pathOrRef: string, isList?: boolean): any {
@@ -39,5 +50,15 @@ export class FirebaseService {
     }
     promise.then(_ => console.log(successMsg))
       .catch(err => console.error(err, errorMsg));
+  }
+
+  private getParentPath(path: string): string {
+    if (path.includes('/')) {
+      const nodes = path.split('/');
+      nodes.pop();
+      return nodes.join('/');
+    } else {
+      return path;
+    }
   }
 }

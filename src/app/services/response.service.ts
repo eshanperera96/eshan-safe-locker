@@ -35,7 +35,7 @@ export class ResponseService {
     }
   }
 
-  public responseUser(user: User, payload: any, responseMsg: string, messageType: MessageType): void {
+  public responseUser(user: User, responseMsg: string, messageType: MessageType, payload: any): void {
     const response: Response = {
       payload,
       message: this.generateMessage(responseMsg, messageType),

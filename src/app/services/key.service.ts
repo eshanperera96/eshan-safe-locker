@@ -11,20 +11,20 @@ export class KeyService {
   constructor(private randomService: RandomService, private cryptoService: CryptoService) { }
 
   public generateKey(uniqueKey: string): SecreteKey {
-    const key = this.randomService.generateRandomString(10);
-    const encryptKey = this.cryptoService.encryptString(key, uniqueKey);
+    // const key = this.randomService.generateRandomString(6);
+    // const encryptKey = this.cryptoService.encryptString(key, uniqueKey);
 
     return {
-      key,
-      encryptedKey: encryptKey.encryptedKey,
-      decryptedKey: encryptKey.decryptedKey,
+      key: '123456',
       uniqueKey
     };
   }
 
   public verifySecreteKey(systemSecreteKey: SecreteKey, userSecreteKey: SecreteKey): boolean {
-    return !(systemSecreteKey.decryptedKey !== userSecreteKey.decryptedKey
-      || systemSecreteKey.encryptedKey !== userSecreteKey.encryptedKey
-      || systemSecreteKey.uniqueKey !== userSecreteKey.uniqueKey);
+    return !(systemSecreteKey.uniqueKey + systemSecreteKey.key !== userSecreteKey.decryptedKey);
+
+    // return !(systemSecreteKey.decryptedKey !== userSecreteKey.decryptedKey
+    //   || systemSecreteKey.encryptedKey !== userSecreteKey.encryptedKey
+    //   || systemSecreteKey.uniqueKey !== userSecreteKey.uniqueKey);
   }
 }
