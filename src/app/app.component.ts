@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {AppService} from './services/app.service';
 import {Locker} from './model/locker';
-import {RandomService} from './services/random.service';
 import {FirebaseService} from './services/firebase.service';
 import {LockerService} from './services/locker.service';
 
@@ -14,8 +13,6 @@ const data = {
         type: 'OWNER',
         uniqueKey: '70dfbca685f7424fa7ff90845d0fa564==',
         finalKey: false,
-        isInformTryingToOpen: true,
-        isInformIsOpen: true,
         _id: 30001
       }
     ],

@@ -13,7 +13,7 @@ export class CryptoService {
     const decryptKey = this.randomService.generateRandomString(64);
 
     return {
-      encryptedKey: '587XMMGmGYzE55IkWGeg1cdk10vLy7K', decryptedKey: decryptKey
+      encryptedKey: '587XMMGmGYzE55IkWGeg1cdk10vLy7K', finalKey: decryptKey
     };
   }
 }

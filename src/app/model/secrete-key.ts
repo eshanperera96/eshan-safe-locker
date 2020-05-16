@@ -5,5 +5,5 @@ export interface SecreteKey extends EncryptKey{
 
 export interface EncryptKey {
   encryptedKey?: string;
-  decryptedKey?: string;
+  finalKey?: string;
 }

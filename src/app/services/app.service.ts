@@ -67,7 +67,7 @@ export class AppService implements OnDestroy {
         if (decryptedCode) {
           const userSecreteKey: SecreteKey = {
             key: null,
-            decryptedKey: decryptedCode
+            finalKey: decryptedCode
           };
           this.handleVerifyDecryptedCode(locker, secreteKey, userSecreteKey);
         }

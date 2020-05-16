@@ -20,7 +20,7 @@ export class KeyService {
   }
 
   public verifySecreteKey(systemSecreteKey: SecreteKey, userSecreteKey: SecreteKey): boolean {
-    if (systemSecreteKey.uniqueKey + systemSecreteKey.key !== userSecreteKey.decryptedKey) {
+    if (systemSecreteKey.uniqueKey + systemSecreteKey.key !== userSecreteKey.finalKey) {
       console.log('secrete key verify failed!');
       return false;
     } else {
