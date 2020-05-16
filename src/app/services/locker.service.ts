@@ -21,5 +21,6 @@ export class LockerService {
   public lockLocker(lockerId: string) {
     console.log('lockLocker');
     this.firebaseService.updateObject(`lockers/${lockerId}`, {_doLock: true, _doOpen: false, _tryingToOpen: false, _verifyOpen: false});
+    window.location.reload();
   }
 }
